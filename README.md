@@ -30,16 +30,23 @@ Register and get license token at our official [Developer Portal](https://effect
 ## Technical Details
 
 - SDK is available for Windows 10+ x64/x86 platforms;
+- SDK is available for macOS 11.0+
   
 ## Getting Started
 
-### Windows Integration
+### Integration
 
 To add the sdk to your project:
 
+**For Windows**:
 * Link `<sdk_dir>\lib\AudioEffectsSDK.lib`
 * Add `<sdk_dir>\include` to your include directories.
 * Place `<sdk_dir>\bin\AudioEffectsSDK.dll` next to your .exe file or add its path to the DLL search paths.
+
+**For macOS**:
+* Link `<sdk_dir>\lib\libAudioEffectsSDK.dylib`
+* Add `<sdk_dir>\include` to your include directories.
+* Put `libAudioEffectsSDK.dylib` into `<your_app_bundle>.app/Contents/Frameworks`
 
 <details>
   <summary>CMake integration sample</summary>
@@ -49,11 +56,18 @@ Assumed you set AUDIO_EFFECTS_SDK_DIR var (`-DAUDIO_EFFECTS_SDK_DIR=<path\to\sdk
 add_library(audio_effects_sdk SHARED IMPORTED)
 add_library(effects_sdk::AudioEffectsSDK ALIAS audio_effects_sdk)
 file(TO_CMAKE_PATH ${AUDIO_EFFECTS_SDK_DIR} AUDIO_EFFECTS_SDK_DIR_CMAKE_PATH)
-set_target_properties(
-    audio_effects_sdk PROPERTIES
-    IMPORTED_LOCATION ${AUDIO_EFFECTS_SDK_DIR_CMAKE_PATH}/bin/AudioEffectsSDK.dll
-    IMPORTED_IMPLIB ${AUDIO_EFFECTS_SDK_DIR_CMAKE_PATH}/lib/AudioEffectsSDK.lib
-)
+if(WIN32)
+    set_target_properties(
+        audio_effects_sdk PROPERTIES
+        IMPORTED_LOCATION ${AUDIO_EFFECTS_SDK_DIR_CMAKE_PATH}/bin/AudioEffectsSDK.dll
+        IMPORTED_IMPLIB ${AUDIO_EFFECTS_SDK_DIR_CMAKE_PATH}/lib/AudioEffectsSDK.lib
+    )
+elseif(APPLE)
+    set_target_properties(
+        audio_effects_sdk PROPERTIES
+        IMPORTED_LOCATION ${AUDIO_EFFECTS_SDK_DIR_CMAKE_PATH}/lib/libAudioEffectsSDK.dylib
+    )
+endif()
 target_include_directories(audio_effects_sdk INTERFACE ${AUDIO_EFFECTS_SDK_DIR_CMAKE_PATH}/include)
 
 # ...
